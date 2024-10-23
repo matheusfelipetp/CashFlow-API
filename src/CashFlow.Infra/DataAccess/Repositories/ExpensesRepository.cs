@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CashFlow.Infra.DataAccess.Repositories
 {
-    internal class ExpensesRepository : IExpenseReadOnlyRepository, IExpensesWriteOnlyRepository
+    internal class ExpensesRepository : IExpenseReadOnlyRepository, IExpensesWriteOnlyRepository, IExpenseUpdateOnlyRepository
     {
 
         private readonly CashflowDbContext _dbContext;
@@ -35,9 +35,19 @@ namespace CashFlow.Infra.DataAccess.Repositories
             return await _dbContext.Expenses.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Expense?> GetById(long id)
+        async Task<Expense?> IExpenseReadOnlyRepository.GetById(long id)
         {
             return await _dbContext.Expenses.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);       
+        }
+
+        async Task<Expense?> IExpenseUpdateOnlyRepository.GetById(long id)
+        {
+            return await _dbContext.Expenses.FirstOrDefaultAsync(e => e.Id == id);
+        }
+
+        public void Update(Expense expense)
+        {
+            _dbContext.Expenses.Update(expense);
         }
     }
 }
